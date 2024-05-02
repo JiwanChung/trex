@@ -1,0 +1,7 @@
+flags:
+  use_slurm_when_available: True
+  local_automatic_gpu_assignment: False
+server:
+  default:
+    q: x
+    p: x

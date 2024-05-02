@@ -24,7 +24,15 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = [
+    "click>=8.1",
+    "pyyaml>=6.0"
+]
+
+[project.optional-dependencies]
+torch = [
+    'torch>=2.0.0'
+]
 
 [project.urls]
 Documentation = "https://github.com/JiwanChung/trex#readme"
@@ -79,3 +87,6 @@ exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
 ]
+
+[project.scripts]
+trex = "trex.cli:trex"

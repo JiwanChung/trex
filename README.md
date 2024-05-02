@@ -14,7 +14,7 @@
 
 ## Installation
 
-```console
+```bash
 pip install trex
 ```
 
@@ -22,29 +22,31 @@ pip install trex
 
 Simply run the command.
 
-```console
+```bash
 # running job in slurm
 
-trex echo "slurmjob"
+trex x echo "slurm job"
 
 # running job in local machine
 
-trex echo "local"
+trex x echo "local job"
 ```
+
+Where `x` means no GPU utilized.
 
 Yes, they are the same. By default, `trex` runs on local machine when slurm is not installed.
 You can adjust this behaviour by modifying the configuration file.
 
 To use GPUs,
 
-```console
+```bash
 # running job in slurm
 
-trex 2 echo "slurm GPU"
+trex 2 echo "slurm GPUs"
 
 # running job in local machine
 
-trex 0,1 echo "local"
+trex 0,1 echo "local GPUs"
 ```
 
 When running in a local machine, you would designate the GPU indices. In slurm environment, just input the required number of GPUs.
@@ -63,22 +65,22 @@ servers:
 
 Then, run the same command as above with `-s/--server` flag set.
 
-```console
+```bash
 trex 2 -s my_server1 echo "roughly equal to srun -p a6000 -q big_qos --gres=gpu:2 echo"
 ```
 
 Finally, `trex` automatically routes jobs to either `sbatch` or `srun`.
 The criterion is simple: you pass a shell file, you get `sbatch` (or `sh $FILE` for local machines).
 
-```console
+```bash
 trex my_job.sh  # sbatch-like
 trex bash my_job.sh  # srun-like
 ```
 
 Also, you can explictly use `sbatch`-like mode by specifing the `-b/--batch` flag.
 
-```console
-trex -b my_job  # sbatch-like command for file my_job
+```bash
+trex x -b my_job  # sbatch-like command for file my_job
 ```
 
 By the way, I suggest aliasing `trex` to `x` for an even easier access.
