@@ -70,6 +70,8 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
 
         if gpus != 'x':
             cmds = [*cmds, f'--gres=gpu:{gpus}']
+        else:
+            envs['CUDA_VISIBLE_DEVICES'] = ''
         cmds = ' '.join(cmds)
         cmds = f'{cmds} {command}'
     else:
@@ -93,6 +95,8 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
                 gpus = get_topk(gpu_mems, gpu_num)
                 gpus = ','.join([str(v) for v in gpus])
             envs['CUDA_VISIBLE_DEVICES'] = str(gpus)
+        else:
+            envs['CUDA_VISIBLE_DEVICES'] = ''
 
         if is_batch:
             cmds = f'{shell} {command}'
