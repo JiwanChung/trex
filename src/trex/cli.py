@@ -9,8 +9,8 @@ from typing import Tuple
 import click
 import yaml
 
-from trex.utils import get_topk, get_gpu_mems
 from trex.run import run_cmd
+from trex.utils import get_gpu_mems, get_topk
 
 
 def load_options():
@@ -28,7 +28,7 @@ def load_options():
 @click.argument('gpus')
 @click.option('-b', '--batch', default=False, is_flag=True)
 @click.option('-a', '--auto', default=False, is_flag=True)
-@click.option('-s', '--server', type=str, default=None, show_default=True)
+@click.option('-s', '--server', type=str, default='default', show_default=True)
 @click.argument('command', nargs=-1, type=str)
 def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
     if len(command) == 0:
@@ -50,14 +50,17 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
 
     command = ' '.join(command)
     envs = {}
-
     if is_slurm:
         cmd = 'sbatch' if is_batch else 'srun'
         cmds = []
-        if server is None:
-            server == 'default'
 
         server_options = options.get('server', {})
+
+        if gpus != 'x' and server == 'default':
+            server = 'cpu_default'
+            if server not in server_options:
+                server = 'default'
+
         if server not in server_options:
             print(
                 f'server is not specified in the configuration file: {server}')
