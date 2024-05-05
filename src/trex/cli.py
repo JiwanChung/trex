@@ -70,6 +70,11 @@ def trex(gpus: str, batch: bool, auto: bool, output: str, local_mode: bool,
             exit()
 
     use_gpus = gpus.isdigit() and int(gpus) != 0
+    if not is_slurm:
+        # setting GPU ids
+        _use_gpus = all(
+            [gpu.isdigit() and int(gpu) != 0 for gpu in gpus.split(',')])
+        use_gpus = use_gpus | _use_gpus
 
     command = ' '.join(command)
     envs = {}
