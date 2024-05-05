@@ -39,6 +39,7 @@ Where `x` means no GPU utilized.
 
 Yes, they are the same. By default, `trex` runs on local machine when slurm is not installed.
 You can adjust this behaviour by modifying the configuration file.
+Also, you can set `-l` flag when running the command to override the default behaviour and force local mode.
 
 To use GPUs,
 
@@ -90,7 +91,8 @@ By the way, I suggest aliasing `trex` to `x` for an even easier access.
 
 ## Configuration
 
-Modify `$HOME/.config/trex.yaml`.
+After running the command first time, you will see the example configuration at `$HOME/.config/trex.yaml`.
+Modify the values accordingly.
 
 ## License
 

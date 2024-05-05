@@ -5,3 +5,6 @@ server:
   default:
     q: x
     p: x
+  cpu_default:
+    q: x
+    p: x

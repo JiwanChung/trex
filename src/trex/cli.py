@@ -40,6 +40,7 @@ def load_options():
               '--output',
               default='none',
               help='slurm mode: sbatch log file output')
+@click.option('-l', '--local-mode', is_flag=True, help='force local mode')
 @click.option('-s',
               '--server',
               type=str,
@@ -47,8 +48,8 @@ def load_options():
               show_default=True,
               help='server name specified in ~/.config/trex.yaml')
 @click.argument('command', nargs=-1, type=str)
-def trex(gpus: str, batch: bool, auto: bool, output: str, server: str,
-         command: Tuple[str]):
+def trex(gpus: str, batch: bool, auto: bool, output: str, local_mode: bool,
+         server: str, command: Tuple[str]):
     if len(command) == 0:
         print("No command given")
         return
@@ -57,6 +58,8 @@ def trex(gpus: str, batch: bool, auto: bool, output: str, server: str,
     is_slurm = shutil.which('srun') is not None
     is_slurm = is_slurm & options.get('flags', {}).get(
         'use_slurm_when_available', True)
+    if local_mode:
+        is_slurm = False
 
     is_batch = len(command) == 1 and command[0].endswith('sh')
     is_batch = is_batch | batch
