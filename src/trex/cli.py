@@ -26,11 +26,29 @@ def load_options():
 
 @click.command()
 @click.argument('gpus')
-@click.option('-b', '--batch', default=False, is_flag=True)
-@click.option('-a', '--auto', default=False, is_flag=True)
-@click.option('-s', '--server', type=str, default='default', show_default=True)
+@click.option('-b',
+              '--batch',
+              default=False,
+              is_flag=True,
+              help='set to use sbatch for files not ending with .sh')
+@click.option('-a',
+              '--auto',
+              default=False,
+              is_flag=True,
+              help='local mode: auto-assign gpus')
+@click.option('-o',
+              '--output',
+              default='none',
+              help='slurm mode: sbatch log file output')
+@click.option('-s',
+              '--server',
+              type=str,
+              default='default',
+              show_default=True,
+              help='server name specified in ~/.config/trex.yaml')
 @click.argument('command', nargs=-1, type=str)
-def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
+def trex(gpus: str, batch: bool, auto: bool, output: str, server: str,
+         command: Tuple[str]):
     if len(command) == 0:
         print("No command given")
         return
@@ -55,6 +73,8 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
     if is_slurm:
         cmd = 'sbatch' if is_batch else 'srun'
         cmds = [cmd]
+        if is_batch and output != 'none':
+            cmds = [*cmds, '-o', output]
 
         server_options = options.get('server', {})
         server_options = {str(k): v for k, v in server_options.items()}
