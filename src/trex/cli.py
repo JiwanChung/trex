@@ -48,20 +48,24 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
             print(f'No batch script file found: {command[0]}')
             exit()
 
+    use_gpus = gpus.isdigit() and int(gpus) != 0
+
     command = ' '.join(command)
     envs = {}
     if is_slurm:
         cmd = 'sbatch' if is_batch else 'srun'
-        cmds = []
+        cmds = [cmd]
 
         server_options = options.get('server', {})
+        server_options = {str(k): v for k, v in server_options.items()}
 
-        if gpus != 'x' and server == 'default':
+        if not use_gpus and server == 'default':
             server = 'cpu_default'
             if server not in server_options:
                 server = 'default'
 
         if server not in server_options:
+            print(server, server_options)
             print(
                 f'server is not specified in the configuration file: {server}')
             return
@@ -71,7 +75,7 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
         if 'q' in opt:
             cmds = [*cmds, *['-q', opt['q']]]
 
-        if gpus != 'x':
+        if use_gpus:
             cmds = [*cmds, f'--gres=gpu:{gpus}']
         else:
             envs['CUDA_VISIBLE_DEVICES'] = ''
@@ -79,7 +83,7 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
         cmds = f'{cmds} {command}'
     else:
         shell = os.environ['SHELL']
-        if gpus != 'x':
+        if use_gpus:
             flag = options.get('flags',
                                {}).get('local_automatic_gpu_assignment', False)
             flag = flag or auto
@@ -106,4 +110,4 @@ def trex(gpus: str, batch: bool, auto: bool, server: str, command: Tuple[str]):
         else:
             cmds = command
     print(f'trex running command: ({cmds})')
-    run_cmd(cmds, batch=is_batch, env=envs)
+    run_cmd(cmds, batch=is_batch and not is_slurm, env=envs)
