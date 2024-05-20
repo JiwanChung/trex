@@ -5,8 +5,11 @@ import os
 import shutil
 from pathlib import Path
 from typing import Tuple, Optional
+from gettext import ngettext
 
 import click
+from click.utils import echo
+from click.core import iter_params_for_processing
 import yaml
 
 from trex.run import run_cmd
@@ -24,7 +27,81 @@ def load_options():
     return options
 
 
-@click.command()
+class OrderedParamsCommand(click.Command):
+    _options = []
+
+    def parse_args(self, ctx, args):
+        if not args and self.no_args_is_help and not ctx.resilient_parsing:
+            echo(ctx.get_help(), color=ctx.color)
+            ctx.exit()
+
+        params = self.get_params(ctx)
+
+        # custom order of consuming params
+        param_dt = {param.name: param for param in params}
+        param_map = {}
+        for param in params:
+            for opt in param.opts:
+                param_map[opt] = param.name
+
+        opts = {}
+        command = []
+        cmd_mode = False
+        parsing_opt = None
+        parsing_num = 0
+        for i, arg in enumerate(args):
+            if cmd_mode:
+                command.append(arg)
+                continue
+
+            if parsing_opt is not None:
+                # check consumable
+                opts[parsing_opt.name].append(arg)
+                parsing_num -= 1
+                if parsing_num < 1:
+                    parsing_opt = None
+                continue
+
+            if arg.startswith("-"):
+                parsing_opt = param_dt[param_map[arg]]
+                if parsing_opt.is_flag:
+                    opts[parsing_opt.name] = True
+                    parsing_opt = None
+                else:
+                    opts[parsing_opt.name] = []
+                    parsing_num = parsing_opt.nargs
+            else:
+                if "gpus" in opts:
+                    cmd_mode = True
+                else:
+                    opts["gpus"] = arg
+
+            if cmd_mode:
+                command.append(arg)
+
+        opts["command"] = command
+        opts = {k: tuple(v) if isinstance(v, list) else v for k, v in opts.items()}
+        args = []
+        param_order = [param_dt[k] for k in opts.keys()]
+
+        for param in iter_params_for_processing(param_order, self.get_params(ctx)):
+            value, args = param.handle_parse_result(ctx, opts, args)
+
+        if args and not ctx.allow_extra_args and not ctx.resilient_parsing:
+            ctx.fail(
+                ngettext(
+                    "Got unexpected extra argument ({args})",
+                    "Got unexpected extra arguments ({args})",
+                    len(args),
+                ).format(args=" ".join(map(str, args)))
+            )
+
+        ctx.args = args
+        # ctx._opt_prefixes.update(parser._opt_prefixes)
+        return args
+
+
+@click.command(cls=OrderedParamsCommand)
 @click.argument("gpus")
 @click.option(
     "-b",
