@@ -34,7 +34,11 @@ def load_options():
     help="set to use sbatch for files not ending with .sh",
 )
 @click.option(
-    "-a", "--auto", default=False, is_flag=True, help="local mode: auto-assign gpus"
+    "-i",
+    "--index",
+    default=False,
+    is_flag=True,
+    help="manual set GPU indices in local mode",
 )
 @click.option(
     "-o", "--output", default="none", help="slurm mode: sbatch log file output"
@@ -52,7 +56,7 @@ def load_options():
 def trex(
     gpus: str,
     batch: bool,
-    auto: bool,
+    index: bool,
     output: str,
     local_mode: bool,
     server: str,
@@ -68,19 +72,28 @@ def trex(
     if local_mode:
         is_slurm = False
 
+    # parse args
+    if is_slurm and index:
+        print("manual gpu index is not supported in slurm mode")
+        exit()
+
+    # parse batch mode
     is_batch = len(command) == 1 and command[0].endswith("sh")
     is_batch = is_batch | batch
-
     if is_batch:
         if not Path(command[0]).is_file():
             print(f"No batch script file found: {command[0]}")
             exit()
 
-    use_gpus = gpus.isdigit() and int(gpus) != 0
-    if not is_slurm:
-        # setting GPU ids
-        _use_gpus = all([gpu.isdigit() and int(gpu) != 0 for gpu in gpus.split(",")])
-        use_gpus = use_gpus | _use_gpus
+    # parse gpu args
+    if index and not is_slurm:
+        # manually setting gpu indices
+        use_gpus = all([gpu.isdigit() and int(gpu) != 0 for gpu in gpus.split(",")])
+    else:
+        use_gpus = gpus.isdigit() and int(gpus) != 0
+    if not (use_gpus or gpus == "x"):
+        print(f"Invalid gpu setup: {gpus}")
+        exit()
 
     command_str = " ".join(command)
     envs = {}
@@ -117,10 +130,7 @@ def trex(
     else:
         shell = os.environ["SHELL"]
         if use_gpus:
-            flag = options.get("flags", {}).get("local_automatic_gpu_assignment", False)
-            flag = flag or auto
-            flag = flag and "," not in gpus
-            if flag:
+            if not index:
                 try:
                     gpu_num = int(gpus)
                 except Exception as e:
@@ -133,7 +143,7 @@ def trex(
                     return
                 gpus_li = get_topk(gpu_mems, gpu_num)
                 gpus = ",".join([str(v) for v in gpus_li])
-            envs["CUDA_VISIBLE_DEVICES"] = str(gpus)
+            envs["CUDA_VISIBLE_DEVICES"] = gpus
         else:
             envs["CUDA_VISIBLE_DEVICES"] = ""
 
@@ -141,5 +151,5 @@ def trex(
             cmds = f"{shell} {command_str}"
         else:
             cmds = command_str
-    print(f"trex command: ({cmds})")
+    print(f"trex: {{gpus: {gpus}, command: ({cmds})}}")
     run_cmd(cmds, batch=is_batch and not is_slurm, env=envs)

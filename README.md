@@ -16,9 +16,6 @@
 
 ```bash
 pip install git+https://github.com/JiwanChung/trex
-
-# for automatic gpu assignment in local machines based on free memories
-pip install git+https://github.com/JiwanChung/trex[torch]
 ```
 
 ## Usage
@@ -44,17 +41,18 @@ Also, you can set `-l` flag when running the command to override the default beh
 To use GPUs,
 
 ```bash
-# running job in slurm
+# running job w/ 2 gpus in slurm
 
 trex 2 echo "slurm GPUs"
 
-# running job in local machine
+# running job w/ 2 gpus in local machine
 
-trex 0,1 echo "local GPUs"
+trex 2 echo "local GPUs"
+
+# in local setup, you can use -i/--index flag to manually designate the gpu indices
+
+trex -i 0,2 echo "GPU 0 and 2"
 ```
-
-When running in a local machine, you would designate the GPU indices. In slurm environment, just input the required number of GPUs.
-This behaviour can also be changed to align local to slurm remote setting by automatically assigning empty GPUs.
 
 In slurm environment, you may also specify your remote server setups.
 
@@ -87,7 +85,7 @@ Also, you can explictly use `sbatch`-like mode by specifing the `-b/--batch` fla
 trex x -b my_job  # sbatch-like command for file my_job
 ```
 
-By the way, I suggest aliasing `trex` to `x` for an even easier access.
+As a side note, I suggest aliasing `trex` to `x` for an even easier access :).
 
 ## Configuration
 

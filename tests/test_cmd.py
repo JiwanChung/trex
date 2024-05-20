@@ -30,7 +30,9 @@ def test_gpu_batch():
     path = str(Path(__file__).parent / "check_gpu.sh")
     prev_env = os.environ.copy()
     env = {**prev_env, "CUDA_VISIBLE_DEVICES": "1,2"}
-    trex_out = subprocess.run(["trex", "1,2", "bash", path], capture_output=True).stdout
+    trex_out = subprocess.run(
+        ["trex", "-i" "1,2", "bash", path], capture_output=True
+    ).stdout
     base_out = subprocess.run(
         ["python", "check_gpu.py"], capture_output=True, env=env
     ).stdout
@@ -41,7 +43,20 @@ def test_gpu_run():
     path = str(Path(__file__).parent / "check_gpu.sh")
     prev_env = os.environ.copy()
     env = {**prev_env, "CUDA_VISIBLE_DEVICES": "1,2"}
-    trex_out = subprocess.run(["trex", "1,2", "bash", path], capture_output=True).stdout
+    trex_out = subprocess.run(
+        ["trex", "-i", "1,2", "bash", path], capture_output=True
+    ).stdout
+    base_out = subprocess.run(
+        ["python", "check_gpu.py"], capture_output=True, env=env
+    ).stdout
+    assert base_out in trex_out
+
+
+def test_gpu_run_auto():
+    path = str(Path(__file__).parent / "check_gpu.sh")
+    prev_env = os.environ.copy()
+    env = {**prev_env, "CUDA_VISIBLE_DEVICES": "1,2"}
+    trex_out = subprocess.run(["trex", "2", "bash", path], capture_output=True).stdout
     base_out = subprocess.run(
         ["python", "check_gpu.py"], capture_output=True, env=env
     ).stdout
