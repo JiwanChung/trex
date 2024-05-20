@@ -4,7 +4,7 @@
 import os
 import shutil
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Optional
 
 import click
 import yaml
@@ -52,6 +52,14 @@ def load_options():
     show_default=True,
     help="server name specified in ~/.config/trex.yaml",
 )
+@click.option(
+    "-a",
+    "--allowed",
+    type=str,
+    default=None,
+    show_default=True,
+    help="Confine available GPUs to the given indices. e.g., 0,1,2,3",
+)
 @click.argument("command", nargs=-1, type=str)
 def trex(
     gpus: str,
@@ -60,15 +68,26 @@ def trex(
     output: str,
     local_mode: bool,
     server: str,
+    allowed: Optional[str],
     command: Tuple[str],
 ):
     if len(command) == 0:
         print("No command given")
         return
-
     options = load_options()
+
+    allowed_gpus = (
+        [int(gpu) for gpu in allowed.split(",")] if allowed is not None else None
+    )
+    if allowed_gpus is None:
+        allowed_gpus = options.get("settings", {}).get("allowed_gpus", None)
+    if allowed_gpus is not None:
+        print(f"Confining available GPUs to: {allowed_gpus}")
+
     is_slurm = shutil.which("srun") is not None
-    is_slurm = is_slurm & options.get("flags", {}).get("use_slurm_when_available", True)
+    is_slurm = is_slurm & options.get("settings", {}).get(
+        "use_slurm_when_available", True
+    )
     if local_mode:
         is_slurm = False
 
@@ -130,19 +149,37 @@ def trex(
     else:
         shell = os.environ["SHELL"]
         if use_gpus:
+            min_gpu_mem = options.get("settings", {}).get("min_gpu_mem", 1)
+            min_gpu_mem = min_gpu_mem * 1024 * 1024  # convert to GB
+
+            try:
+                gpu_mems = get_gpu_mems()
+            except Exception as e:
+                print("failded to retrieve GPU informations")
+                print(e)
+                return
+            gpu_mems = {k: v for k, v in gpu_mems.items() if v >= min_gpu_mem}
+            if allowed_gpus is not None:
+                gpu_mems = {k: v for k, v in gpu_mems.items() if k in allowed_gpus}
+
             if not index:
-                try:
-                    gpu_num = int(gpus)
-                except Exception as e:
-                    print(f"Invalid gpu setup: {gpus}")
-                    return
-                try:
-                    gpu_mems = get_gpu_mems()
-                except Exception as e:
-                    print(e)
+                gpu_num = int(gpus)
+
+                if gpu_num > len(gpu_mems):
+                    print(
+                        f"requested {gpu_num} GPUs, but only {len(gpu_mems)} Free GPUs are available"
+                    )
                     return
                 gpus_li = get_topk(gpu_mems, gpu_num)
-                gpus = ",".join([str(v) for v in gpus_li])
+                gpus = ",".join([str(v) for v in sorted(gpus_li)])
+            else:
+                gpu_ids = [int(g) for g in gpus.split(",")]
+                invalids = set(gpu_ids) - set(gpu_mems.keys())
+                if len(invalids) > 0:
+                    msg = f"requested GPU indices: {list(sorted(gpu_ids))}, but GPU {list(sorted(invalids))} are not available"
+                    print(msg)
+                    return
+
             envs["CUDA_VISIBLE_DEVICES"] = gpus
         else:
             envs["CUDA_VISIBLE_DEVICES"] = ""
@@ -151,5 +188,5 @@ def trex(
             cmds = f"{shell} {command_str}"
         else:
             cmds = command_str
-    print(f"trex: {{gpus: {gpus}, command: ({cmds})}}")
+    print(f"trex: {{gpus: [{gpus}], command: ({cmds})}}")
     run_cmd(cmds, batch=is_batch and not is_slurm, env=envs)

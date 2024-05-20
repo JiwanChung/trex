@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from typing import List, Dict
+from typing import List, Dict, Any
 
 
 def argsort(seq):
     return [x for x, y in sorted(enumerate(seq), key=lambda x: x[1])]
 
 
-def get_topk(seq, k: int = 1, largest: bool = True):
-    seq = argsort(seq)
+def get_topk(seq: Dict[Any, float], k: int = 1, largest: bool = True) -> List[float]:
+    _seq = sorted(seq.items(), key=lambda x: x[1])
+
     if largest:
-        seq = reversed(seq)
-    seq = list(seq)
-    return seq[:k]
+        _seq = reversed(_seq)
+    _seq = list([x[0] for x in _seq])
+    return _seq[:k]
 
 
 def check_import(name: str):
@@ -39,10 +40,10 @@ def get_gpu_info() -> Dict[int, Dict[str, float]]:
     return mems
 
 
-def get_gpu_mems() -> List[float]:
+def get_gpu_mems() -> Dict[int, float]:
     assert check_import(
         "nvidia_smi"
-    ), f"automatic gpu assignment requires nvidia_smi as dependency. Try `pip install trex[gpu]`"
+    ), "automatic gpu assignment requires nvidia_smi as dependency. Try `pip install trex[gpu]`"
 
     info = get_gpu_info()
-    return [info[i]["free"] for i in range(len(info))]
+    return {k: v["free"] for k, v in info.items()}
