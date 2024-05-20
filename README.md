@@ -15,10 +15,10 @@
 ## Installation
 
 ```bash
-pip install git+https://github.com/JiwanChung.trex
+pip install git+https://github.com/JiwanChung/trex
 
 # for automatic gpu assignment in local machines based on free memories
-pip install git+https://github.com/JiwanChung.trex[torch]
+pip install git+https://github.com/JiwanChung/trex[torch]
 ```
 
 ## Usage
