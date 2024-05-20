@@ -264,5 +264,8 @@ def trex(
             cmds = f"{shell} {command_str}"
         else:
             cmds = command_str
-    print(f"trex: {{gpus: [{gpus}], command: ({cmds})}}")
+    click.echo(
+        click.style("[🦖 trex]", bold=True) + f" {{gpus: [{gpus}], command: ({cmds})}}"
+    )
+    click.echo("")
     run_cmd(cmds, batch=is_batch and not is_slurm, env=envs)
