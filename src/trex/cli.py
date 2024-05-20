@@ -110,7 +110,7 @@ def trex(
         use_gpus = all([gpu.isdigit() and int(gpu) != 0 for gpu in gpus.split(",")])
     else:
         use_gpus = gpus.isdigit() and int(gpus) != 0
-    if not (use_gpus or gpus == "x"):
+    if not (use_gpus or gpus in ["0", "x"]):
         print(f"Invalid gpu setup: {gpus}")
         exit()
 
@@ -142,8 +142,7 @@ def trex(
 
         if use_gpus:
             cmds = [*cmds, f"--gres=gpu:{gpus}"]
-        else:
-            envs["CUDA_VISIBLE_DEVICES"] = ""
+
         cmds = " ".join(cmds)
         cmds = f"{cmds} {command_str}"
     else:
