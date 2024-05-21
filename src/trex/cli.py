@@ -264,8 +264,10 @@ def trex(
             cmds = f"{shell} {command_str}"
         else:
             cmds = command_str
-    click.echo(
-        click.style("[🦖 trex]", bold=True) + f" {{gpus: [{gpus}], command: ({cmds})}}"
-    )
-    click.echo("")
+    if not options.get("settings", {}).get("mute_status", False):
+        click.echo(
+            click.style("[🦖 trex]", bold=True)
+            + f" {{gpus: [{gpus}], command: ({cmds})}}"
+        )
+        click.echo("")
     run_cmd(cmds, batch=is_batch and not is_slurm, env=envs)

@@ -138,6 +138,15 @@ Then everything would work as expected. `trex` will not use the other GPUs in au
 
 This option is also available on-the-fly as the `-a/--allowed` argument. In that case, provide indices with `,` as the separator.
 
+4. Muting status message.
+
+```yaml
+    settings:
+        mute_status: True
+```
+
+Now you won't see the status report every time you run `trex`.
+
 ## License
 
 `trex` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
