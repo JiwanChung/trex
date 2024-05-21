@@ -1,4 +1,4 @@
-# Tremendous REmote eXecutor
+# 🦖 Tremendous REmote eXecutor
 
 [![PyPI - Version](https://img.shields.io/pypi/v/trex.svg)](https://pypi.org/project/trex)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/trex.svg)](https://pypi.org/project/trex)
