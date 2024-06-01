@@ -3,7 +3,8 @@ settings:
   allowed_gpus: null  # confine indices as [0,1,2,4]
   min_gpu_mem: 1  # in gigabytes
   mute_status: False  # mute status message
-  pymmode: False  # enable auto running .py scripts w/o python prefix
+# open:
+#   python: ".py"
 server:
   default:
     q: x

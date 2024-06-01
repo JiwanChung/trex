@@ -147,15 +147,17 @@ This option is also available on-the-fly as the `-a/--allowed` argument. In that
 
 Now you won't see the status report every time you run `trex`.
 
-5. Python mode
+5. Default open command
 
 
 ```yaml
-    settings:
-        pymode: True
+    open:
+        python: ".py"
+        # jq: ".json"
+        # ...
 ```
 
-Now you won't need to type `python` every time you launch a python script.
+Now you won't need to type `python` every time you launch `.py` script.
 
 ## License
 

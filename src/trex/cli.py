@@ -165,7 +165,6 @@ def trex(
     is_slurm = is_slurm & options.get("settings", {}).get(
         "use_slurm_when_available", True
     )
-    pymode = options.get("settings", {}).get("pymode", False)
     if local_mode:
         is_slurm = False
 
@@ -193,12 +192,12 @@ def trex(
         exit()
 
     command_str = " ".join(command).strip()
-    if (
-        pymode
-        and (not command_str.startswith("python"))
-        and command_str.endswith(".py")
-    ):
-        command_str = f"python {command_str}"
+
+    open_modes = options.get("open", {})
+    for open_cmd, open_suffix in open_modes.items():
+        if (not command_str.startswith(open_cmd)) and command_str.endswith(open_suffix):
+            command_str = f"{open_cmd} {command_str}"
+            break
     envs = {}
     if is_slurm:
         cmd = "sbatch" if is_batch else "srun"
