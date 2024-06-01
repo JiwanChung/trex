@@ -165,6 +165,7 @@ def trex(
     is_slurm = is_slurm & options.get("settings", {}).get(
         "use_slurm_when_available", True
     )
+    pymode = options.get("settings", {}).get("pymode", False)
     if local_mode:
         is_slurm = False
 
@@ -191,7 +192,13 @@ def trex(
         print(f"Invalid gpu setup: {gpus}")
         exit()
 
-    command_str = " ".join(command)
+    command_str = " ".join(command).strip()
+    if (
+        pymode
+        and (not command_str.startswith("python"))
+        and command_str.endswith(".py")
+    ):
+        command_str = f"python {command_str}"
     envs = {}
     if is_slurm:
         cmd = "sbatch" if is_batch else "srun"

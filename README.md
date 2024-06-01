@@ -147,6 +147,16 @@ This option is also available on-the-fly as the `-a/--allowed` argument. In that
 
 Now you won't see the status report every time you run `trex`.
 
+5. Python mode
+
+
+```yaml
+    settings:
+        pymode: True
+```
+
+Now you won't need to type `python` every time you launch a python script.
+
 ## License
 
 `trex` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
