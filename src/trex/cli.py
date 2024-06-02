@@ -195,7 +195,9 @@ def trex(
 
     open_modes = options.get("open", {})
     for open_cmd, open_suffix in open_modes.items():
-        if (not command_str.startswith(open_cmd)) and command_str.endswith(open_suffix):
+        if (not command_str.startswith(open_cmd)) and command_str.split(" ")[
+            0
+        ].endswith(open_suffix):
             command_str = f"{open_cmd} {command_str}"
             break
     envs = {}
