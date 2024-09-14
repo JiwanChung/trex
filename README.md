@@ -96,6 +96,14 @@ trex x -b my_job  # sbatch-like command for file my_job
 
 As a side note, I suggest aliasing `trex` to `x` for an even easier access :).
 
+4. Interactive session
+
+In need of interactivity with `srun`? `trex` allows `--pty` option just as plain `srun`.
+
+```bash
+trex 2 -s my_server1 --pty /bin/bash
+```
+
 ## Configuration
 
 After running the command first time, you will see the example configuration at `$HOME/.config/trex.yaml`.
