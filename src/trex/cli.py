@@ -148,7 +148,7 @@ def trex(
     allowed: Optional[str],
     command: Tuple[str],
 ):
-    print(server, type(server))
+    print(server[0], server[-1])
     if len(command) == 0:
         print("No command given")
         return
@@ -219,7 +219,6 @@ def trex(
             if server not in server_options:
                 server = "default"
 
-        print(server, type(server))
         if server not in server_options:
             print(server, server_options)
             print(f"server is not specified in the configuration file: {server}")
