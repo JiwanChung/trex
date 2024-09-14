@@ -218,6 +218,9 @@ def trex(
             if server not in server_options:
                 server = "default"
 
+        if not isinstance(server, str):
+            server = server[0]
+
         if server not in server_options:
             print(server, server_options)
             print(f"server is not specified in the configuration file: {server}")
