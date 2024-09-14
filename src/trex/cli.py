@@ -153,9 +153,6 @@ def trex(
         return
     options = load_options()
 
-    if isinstance(server, tuple):
-        server = server[0]
-
     allowed_gpus = (
         [int(gpu) for gpu in allowed.split(",")] if allowed is not None else None
     )
@@ -209,6 +206,9 @@ def trex(
         cmds = [cmd]
         if is_batch and output != "none":
             cmds = [*cmds, "-o", output]
+
+        if not isinstance(server, str):
+            server = server[0]
 
         server_options = options.get("server", {})
         server_options = {str(k): v for k, v in server_options.items()}
