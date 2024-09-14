@@ -174,7 +174,7 @@ def trex(
         exit()
 
     # parse batch mode
-    is_batch = len(command) == 1 and command[0].endswith("sh")
+    is_batch = len(command) == 1 and command[0].endswith(".sh")
     is_batch = is_batch | batch
     if is_batch:
         if not Path(command[0]).is_file():
