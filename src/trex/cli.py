@@ -153,6 +153,9 @@ def trex(
         return
     options = load_options()
 
+    if isinstance(server, tuple):
+        server = server[0]
+
     allowed_gpus = (
         [int(gpu) for gpu in allowed.split(",")] if allowed is not None else None
     )
