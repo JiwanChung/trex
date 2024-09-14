@@ -145,6 +145,13 @@ class OrderedParamsCommand(click.Command):
     show_default=True,
     help="Confine available GPUs to the given indices. e.g., 0,1,2,3",
 )
+@click.option(
+    "-p",
+    "--pty",
+    default=False,
+    is_flag=True,
+    help="pty option for interactive sessions",
+)
 @click.argument("command", nargs=-1, type=str)
 def trex(
     gpus: str,
@@ -154,6 +161,7 @@ def trex(
     local_mode: bool,
     server: str,
     allowed: Optional[str],
+    pty: bool,
     command: Tuple[str],
 ):
     if len(command) == 0:
@@ -212,6 +220,8 @@ def trex(
     if is_slurm:
         cmd = "sbatch" if is_batch else "srun"
         cmds = [cmd]
+        if pty:
+            cmds.append("--pty")
         if is_batch and output != "none":
             cmds = [*cmds, "-o", output]
 
