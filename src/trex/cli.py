@@ -79,16 +79,16 @@ class OrderedParamsCommand(click.Command):
             if cmd_mode:
                 command.append(arg)
 
-        def format_vals(v):
+        def format_vals(k, v):
             if isinstance(v, list):
-                if len(v) == 1:
+                if len(v) == 1 and k != 'command':
                     v = v[0]
                 else:
                     v = tuple(v)
             return v
 
         opts["command"] = command
-        opts = {k: format_vals(v) for k, v in opts.items()}
+        opts = {k: format_vals(k, v) for k, v in opts.items()}
         args = []
         param_order = [param_dt[k] for k in opts.keys()]
 
