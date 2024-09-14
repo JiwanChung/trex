@@ -79,8 +79,16 @@ class OrderedParamsCommand(click.Command):
             if cmd_mode:
                 command.append(arg)
 
+        def format_vals(v):
+            if isinstance(v, list):
+                if len(v) == 1:
+                    v = v[0]
+                else:
+                    v = tuple(v)
+            return v
+
         opts["command"] = command
-        opts = {k: tuple(v) if isinstance(v, list) else v for k, v in opts.items()}
+        opts = {k: format_vals(v) for k, v in opts.items()}
         args = []
         param_order = [param_dt[k] for k in opts.keys()]
 
@@ -148,7 +156,6 @@ def trex(
     allowed: Optional[str],
     command: Tuple[str],
 ):
-    print(server[0], server[-1])
     if len(command) == 0:
         print("No command given")
         return
